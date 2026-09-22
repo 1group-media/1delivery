@@ -1,8 +1,19 @@
 import { NextResponse } from 'next/server';
 import { DeliveryRepository } from '@/lib/db/repo';
+import { checkRateLimit } from '@/lib/rate-limiter';
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'dispatch_client';
+    const rate = checkRateLimit(ip, 30, 60000);
+
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Tasa de despacho excedida. Espere unos segundos.', resetInSec: rate.resetInSec },
+        { status: 429, headers: { 'Retry-After': String(rate.resetInSec) } }
+      );
+    }
+
     const body = await req.json();
 
     if (!body.type || !body.storeSlug || !body.pickupAddress || !body.deliveryAddress || !body.recipientName || !body.recipientPhone || !body.packageDescription) {
@@ -24,7 +35,18 @@ export async function POST(req: Request) {
       notes: body.notes,
     });
 
-    return NextResponse.json({ success: true, run }, { status: 201 });
+    // @ts-ignore
+    const isReplay = Boolean(run?.isIdempotentReplay);
+
+    return NextResponse.json(
+      { success: true, run, isIdempotentReplay: isReplay },
+      {
+        status: isReplay ? 200 : 201,
+        headers: {
+          'X-Idempotent-Replay': isReplay ? 'true' : 'false',
+        },
+      }
+    );
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

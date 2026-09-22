@@ -205,9 +205,19 @@ export default function MotorizadoPwa({ params }: { params: Promise<{ id: string
                 <div>
                   <span className="text-[10px] uppercase text-slate-500 font-bold block">2. Entregar a:</span>
                   <span className="font-medium text-slate-200">{activeRun.deliveryAddress} ({activeRun.deliveryZone})</span>
-                  <p className="text-[11px] text-amber-300 mt-0.5 font-bold">
-                    Cliente: {activeRun.recipientName} · {activeRun.recipientPhone}
-                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-[11px] text-amber-300 font-bold">
+                      Cliente: {activeRun.recipientName} · {activeRun.recipientPhone}
+                    </p>
+                    <a
+                      href={`https://wa.me/${activeRun.recipientPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`¡Hola ${activeRun.recipientName}! Soy tu motorizado de 1delivery. Voy en camino con tu paquete (${activeRun.packageDescription}).`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg transition"
+                    >
+                      <span>💬</span> WhatsApp
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

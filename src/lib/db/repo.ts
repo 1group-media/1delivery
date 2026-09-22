@@ -68,6 +68,20 @@ export class DeliveryRepository {
     const feeUsd = params.deliveryFeeUsd || 2.50; // $2.50 base delivery fee in Anaco
     const feeVes = (feeUsd * bcvRate).toFixed(2);
 
+    // Idempotency check: prevent duplicate runs for the same orderId or jobId
+    if (params.orderId) {
+      const existing = await db.select().from(deliveryRuns).where(eq(deliveryRuns.orderId, params.orderId)).limit(1);
+      if (existing.length > 0) {
+        return { ...existing[0], isIdempotentReplay: true };
+      }
+    }
+    if (params.jobId) {
+      const existing = await db.select().from(deliveryRuns).where(eq(deliveryRuns.jobId, params.jobId)).limit(1);
+      if (existing.length > 0) {
+        return { ...existing[0], isIdempotentReplay: true };
+      }
+    }
+
     const id = `run_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
     const [run] = await db.insert(deliveryRuns).values({
