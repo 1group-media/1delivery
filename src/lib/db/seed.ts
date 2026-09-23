@@ -40,7 +40,7 @@ export async function seedDelivery() {
     pickupAddress: 'Auto Repuestos El Tigre, Av. Mérida, Anaco',
     deliveryAddress: 'Taller MotoZen ADV, Galpón #4, Zona Industrial Anaco',
     deliveryZone: 'Zona Industrial',
-    recipientName: 'Ron (Taller MotoZen)',
+    recipientName: '1group Ops (Taller MotoZen)',
     recipientPhone: '0412-0000000',
     packageDescription: 'Pastillas de freno Brembo + Filtro de Aceite K&N para Ducati DesertX',
     deliveryFeeUsd: 3.50,
