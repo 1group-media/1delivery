@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
 import { DeliveryRepository } from '@/lib/db/repo';
+import { isAuthorizedRequest } from '@/lib/auth';
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!isAuthorizedRequest(req)) {
+      return NextResponse.json(
+        { error: 'No autorizado. Se requiere token o API key de administrador para liquidar pagos.' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const settlement = await DeliveryRepository.settleCourierPayout(id);
 

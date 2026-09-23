@@ -1,9 +1,17 @@
 import { NextResponse } from 'next/server';
 import { DeliveryRepository } from '@/lib/db/repo';
 import { checkRateLimit } from '@/lib/rate-limiter';
+import { isAuthorizedRequest } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
+    if (!isAuthorizedRequest(req)) {
+      return NextResponse.json(
+        { error: 'No autorizado. Se requiere token o API key de comercio para solicitar despachos.' },
+        { status: 401 }
+      );
+    }
+
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'dispatch_client';
     const rate = checkRateLimit(ip, 30, 60000);
 
